@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+    <link href="styles.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+    </div>
+</body>
+<script>
+    // https://github.com/orgs/community/discussions/108921
+
+    function read() {
+        let apiKey = 'AIzaSyDqYQY5dtA0eSRtq_i5C9o64_cGDaTDebg';
+        let spreadsheetId = '1d148eL8rap8-MoqplzeTaHnnwH8VZUlf1ITPzE8RWrI';
+        let sheetName = 'Sheet1';
+
+        fetch(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheetName}?key=${apiKey}`)
+            .then(response => response.json())
+            .then(data => render(data.values))
+            .catch(error => console.error('Error:', error));
+    }
+
+    function parse(sheet) {
+        let startingIndex = 0;
+        let endingIndex = 1;
+        let textIndex = 2;
+
+        let events = [];
+        for (let i = 1; i < sheet.length; i++) {
+            let startingDate = new Date(sheet[i][startingIndex]);
+            let endingDate = new Date(sheet[i][endingIndex]);
+            let text = sheet[i][textIndex];
+            events.push(new Event(startingDate, endingDate, text));
+        }
+        return events.sort((a, b) => a.startingDate - b.startingDate);
+    }
+
+    function render(sheet) {
+        let events = this.parse(sheet);
+        let component = '';
+        let lastYear = events[0].getStartingPoint();
+        events.forEach(event => {
+            component += `<div class="row component" style="padding-left:${event.getStartingPoint() - lastYear}px">
+                            <div class="middle" style="width:${event.getElapsedPoints()}px"></div>
+                            <div class="first">${event.text}</div>
+                            <div class="right">${event.startingDate.toDateString()}</div>
+                            <div class="right">${event.endingDate.toDateString()}</div>
+                        </div>`;
+            lastYear = event.getStartingPoint();
+        });
+
+        document.getElementsByClassName('container')[0].innerHTML = component;
+    }
+
+
+    // <div class="arrow arrow-red"></div>
+
+    document.addEventListener('load', read())
+
+    class Event {
+        #scale = 100;
+
+        constructor(startingDate, endingDate, text) {
+            this.startingDate = startingDate;
+            this.endingDate = endingDate;
+            this.text = text;
+        }
+
+        getStartingPoint() {
+            return (new Date(this.startingDate).getMonth() + new Date(this.startingDate).getFullYear());
+        }
+
+        getEndingPoint() {
+            return (new Date(this.endingDate).getMonth() + new Date(this.endingDate).getFullYear());
+        }
+
+        getElapsedPoints() {
+            return this.getEndingPoint() - this.getStartingPoint();
+        }
+
+        getMonths() {
+            let difference = new Date(this.startingDate) - new Date(this.endingDate);
+            let days = difference / (1000 * 3600 * 24);
+            let months = days / 30.2;
+            return Math.trunc(months * -1);
+        }
+    }
+</script>
+
+</html>
