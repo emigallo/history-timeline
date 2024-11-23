@@ -39,6 +39,10 @@
         let events = [];
         for (let i = 1; i < sheet.length; i++) {
             let startingDate = new Date(sheet[i][startingIndex]);
+
+            if (sheet[i][endingIndex] == '') {
+                sheet[i][endingIndex] = startingDate + 10;
+            }
             let endingDate = new Date(sheet[i][endingIndex]);
             let text = sheet[i][textIndex];
             events.push(new Event(startingDate, endingDate, text));
@@ -49,28 +53,24 @@
     function render(sheet) {
         let events = this.parse(sheet);
         let component = '';
-        let lastYear = events[0].getStartingPoint();
+        let offset = events[0].getStartingPoint();
         events.forEach(event => {
             component += `<div class="row component">
                             <div class="first"></div>            
-                            <div class="time-line" style="left:${event.getStartingPoint() - lastYear}px; width:${event.getElapsedPoints()}px"></div>
-                            <div class="right" style="left:${event.getStartingPoint() - lastYear + event.getElapsedPoints()}px;">
+                            <div class="time-line" style="left:${event.getStartingPoint() - offset}px; width:${event.getElapsedPoints()}px"></div>
+                            <div class="right" style="left:${event.getStartingPoint() - offset + event.getElapsedPoints()+15}px;">
                                 ${event.text} - ${event.getStartingDateFormatted()} - ${event.getEndingDateFormatted()}
                             </div>
                         </div>`;
-            lastYear = event.getStartingPoint();
         });
 
         document.getElementById('container').innerHTML = component;
     }
-
-
-    // <div class="arrow arrow-red"></div>
-
+    
     document.addEventListener('load', read())
 
     class Event {
-        scale = 5;
+        scale = 3;
 
         constructor(startingDate, endingDate, text) {
             this.startingDate = startingDate;
@@ -83,7 +83,10 @@
         }
 
         getEndingPoint() {
-            return new Date(this.endingDate) / 1000 / 60 / 60 / 24 / 31 / this.scale;
+            if (this.endingDate) {
+                return new Date(this.endingDate) / 1000 / 60 / 60 / 24 / 31 / this.scale;
+            }
+            return 10;
         }
 
         getElapsedPoints() {
