@@ -14,7 +14,7 @@
 </head>
 
 <body>
-    <div class="container">
+    <div id="container" class="container-fluid">
     </div>
 </body>
 <script>
@@ -51,16 +51,17 @@
         let component = '';
         let lastYear = events[0].getStartingPoint();
         events.forEach(event => {
-            component += `<div class="row component" style="padding-left:${event.getStartingPoint() - lastYear}px">
-                            <div class="middle" style="width:${event.getElapsedPoints()}px"></div>
-                            <div class="first">${event.text}</div>
-                            <div class="right">${event.startingDate.toDateString()}</div>
-                            <div class="right">${event.endingDate.toDateString()}</div>
+            component += `<div class="row component">
+                            <div class="first"></div>            
+                            <div class="time-line" style="left:${event.getStartingPoint() - lastYear}px; width:${event.getElapsedPoints()}px"></div>
+                            <div class="right" style="left:${event.getStartingPoint() - lastYear + event.getElapsedPoints()}px;">
+                                ${event.text} - ${event.getStartingDateFormatted()} - ${event.getEndingDateFormatted()}
+                            </div>
                         </div>`;
             lastYear = event.getStartingPoint();
         });
 
-        document.getElementsByClassName('container')[0].innerHTML = component;
+        document.getElementById('container').innerHTML = component;
     }
 
 
@@ -69,7 +70,7 @@
     document.addEventListener('load', read())
 
     class Event {
-        #scale = 100;
+        scale = 5;
 
         constructor(startingDate, endingDate, text) {
             this.startingDate = startingDate;
@@ -78,11 +79,11 @@
         }
 
         getStartingPoint() {
-            return (new Date(this.startingDate).getMonth() + new Date(this.startingDate).getFullYear());
+            return new Date(this.startingDate) / 1000 / 60 / 60 / 24 / 31 / this.scale;
         }
 
         getEndingPoint() {
-            return (new Date(this.endingDate).getMonth() + new Date(this.endingDate).getFullYear());
+            return new Date(this.endingDate) / 1000 / 60 / 60 / 24 / 31 / this.scale;
         }
 
         getElapsedPoints() {
@@ -94,6 +95,14 @@
             let days = difference / (1000 * 3600 * 24);
             let months = days / 30.2;
             return Math.trunc(months * -1);
+        }
+
+        getStartingDateFormatted() {
+            return `${new Date(this.startingDate).getFullYear()}`;
+        }
+
+        getEndingDateFormatted() {
+            return `${new Date(this.endingDate).getFullYear()}`;
         }
     }
 </script>
