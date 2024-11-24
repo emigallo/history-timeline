@@ -1,5 +1,6 @@
 .first {
     width: auto;
+    position: absolute;
 }
 
 .time-line {
@@ -12,16 +13,12 @@
 .right {
     width: auto;
     position: absolute;
-    /* visibility: hidden; */
 }
 
 .component {
     flex-wrap: nowrap;
-    /* background-color: gray; */
     margin-top: 5px;
     margin-bottom: 5px;
-    /* padding-top: 3px; */
-    /* padding-bottom: 3px; */
     position: relative;
     height: 20px;
 }

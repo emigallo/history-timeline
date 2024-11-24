@@ -35,6 +35,7 @@
         let startingIndex = 0;
         let endingIndex = 1;
         let textIndex = 2;
+        let detailIndex = 3;
 
         let events = [];
         for (let i = 1; i < sheet.length; i++) {
@@ -45,7 +46,8 @@
             }
             let endingDate = new Date(sheet[i][endingIndex]);
             let text = sheet[i][textIndex];
-            events.push(new Event(startingDate, endingDate, text));
+            let detail = sheet[i][detailIndex];
+            events.push(new Event(startingDate, endingDate, text, detail));
         }
         return events.sort((a, b) => a.startingDate - b.startingDate);
     }
@@ -53,29 +55,30 @@
     function render(sheet) {
         let events = this.parse(sheet);
         let component = '';
-        let offset = events[0].getStartingPoint();
+        let offset = events[0].getStartingPoint() - 100;
         events.forEach(event => {
-            component += `<div class="row component">
-                            <div class="first"></div>            
+            component += `<div class="row component" title="${event.getFullDetail()}">
+                            <div class="first" style="left:${event.getStartingPoint() - offset - 100}px;""> ${event.getStartingDateFormatted()} - ${event.getEndingDateFormatted()}</div>            
                             <div class="time-line" style="left:${event.getStartingPoint() - offset}px; width:${event.getElapsedPoints()}px"></div>
-                            <div class="right" style="left:${event.getStartingPoint() - offset + event.getElapsedPoints()+15}px;">
-                                ${event.text} - ${event.getStartingDateFormatted()} - ${event.getEndingDateFormatted()}
+                            <div class="right" style="left:${event.getStartingPoint() - offset + event.getElapsedPoints() + 15}px;">
+                                <b>${event.text}</b>
                             </div>
                         </div>`;
         });
 
         document.getElementById('container').innerHTML = component;
     }
-    
+
     document.addEventListener('load', read())
 
     class Event {
         scale = 3;
 
-        constructor(startingDate, endingDate, text) {
+        constructor(startingDate, endingDate, text, detail) {
             this.startingDate = startingDate;
             this.endingDate = endingDate;
             this.text = text;
+            this.detail = detail ? detail : '';
         }
 
         getStartingPoint() {
@@ -106,6 +109,12 @@
 
         getEndingDateFormatted() {
             return `${new Date(this.endingDate).getFullYear()}`;
+        }
+
+        getFullDetail() {
+            return `${new Date(this.startingDate).toDateString()} - ${new Date(this.endingDate).toDateString()}
+            ${this.text}
+            ${this.detail}`;
         }
     }
 </script>
